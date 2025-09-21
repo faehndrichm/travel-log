@@ -1,0 +1,9 @@
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS builder
+WORKDIR /src
+COPY . ./
+RUN dotnet publish image-service/image-service.csproj -c Release -o /out
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
+WORKDIR /app
+COPY --from=builder /out .
+ENTRYPOINT ["dotnet", "image-service.dll"]
