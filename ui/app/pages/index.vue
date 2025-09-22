@@ -1,5 +1,4 @@
 <template>
-
     <div>
         <JourneyForm></JourneyForm>
     </div>
