@@ -15,8 +15,11 @@ services:
     build:
       context: ./ui
       dockerfile: Dockerfile
+      target: dev
     ports:
         - "3000:3000"
+    volumes:
+      - ./ui:/app # for dev only
     environment:
       PUBLIC_API_BASE: http://localhost:8080
 
