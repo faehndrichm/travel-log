@@ -15,5 +15,13 @@ export default defineNuxtConfig({
     '@nuxt/image',
     '@nuxt/ui',
     '@nuxt/eslint',
-  ]
+  ],
+  nitro: {
+      preset: 'bun',
+   },
+   runtimeConfig: {
+    public: {
+      apiBase: '',
+    },
+  },
 })

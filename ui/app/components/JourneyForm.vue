@@ -29,18 +29,33 @@ const df = new DateFormatter('en-US', { dateStyle: 'medium' })
 const toast = useToast()
 
 async function onSubmit(event: FormSubmitEvent<JourneySchema>) {
+  try {
+    const config = useRuntimeConfig();
+    console.log(config);
+    const baseURL = "http://localhost:8080"; // TODO: config.public.apiBase;
 
-  let res = await fetch('/api/journeys', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(event.data),
-  });
+    const res = await $fetch(baseURL + '/journeys/api/journeys', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(event.data),
+    });
 
-  toast.add({
-    title: 'Success',
-    description: 'The journey has been created.',
-    color: 'success'
-  });
+    console.log('Journey created:', res);
+
+    toast.add({
+      title: 'Success',
+      description: 'The journey has been created.',
+      color: 'success',
+    });
+  } catch (error: any) {
+    console.error('Failed to create journey:', error);
+
+    toast.add({
+      title: 'Error',
+      description: error?.message || 'Failed to create journey.',
+      color: 'error',
+    });
+  }
 }
 </script>
 
