@@ -1,71 +1,81 @@
 <script setup lang="ts">
+import * as z from 'zod'
+import { reactive, shallowRef, watch } from 'vue'
+import type { FormSubmitEvent } from '@nuxt/ui'
+import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
 
-const message = reactive({
-  name: "",
-  startDate: "",
-  endDate: "",
-});
+const schema = z.object({
+  name: z.string(),
+  startDate: z.date(),
+  endDate: z.date(),
+})
 
-const ok = ref(false);
-const error = ref("");
+type JourneySchema = z.output<typeof schema>
 
-async function createJourney() {
-  // TODO: fix fetch
-  console.log("create journey");
-  // const res = await fetch({
-  //     url: "http://localhost:8080/journeys/api/journeys",
-  //     formData: message,
-  // },{
-  //     data: message
-  // });
+const state = reactive<Partial<JourneySchema>>({
+  name: undefined,
+  startDate: undefined,
+  endDate: undefined,
+})
 
+const startModel = shallowRef(undefined as CalendarDate | undefined)
+const endModel = shallowRef(undefined as CalendarDate | undefined)
+
+watch(startModel, (val) => (state.startDate = val?.toDate(getLocalTimeZone())))
+watch(endModel, (val) => (state.endDate = val?.toDate(getLocalTimeZone())))
+
+const df = new DateFormatter('en-US', { dateStyle: 'medium' })
+
+const toast = useToast()
+
+async function onSubmit(event: FormSubmitEvent<JourneySchema>) {
+
+  let res = await fetch('/api/journeys', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(event.data),
+  });
+
+  toast.add({
+    title: 'Success',
+    description: 'The journey has been created.',
+    color: 'success'
+  });
 }
-
 </script>
 
 <template>
-  <section id="contact" class=" flex justify-center">
-    <div class="py-6 md:py-24 w-full max-w-6xl mx-6 flex flex-col justify-center items-center">
-      <div id="contact-form-submitted"
-        class="font-medium mx-auto max-w-lg flex flex-col items-center text-center motion-safe:animate-fadeIn"
-        :class="{ hidden: !ok }">
-        <h2 class="text-3xl">Danke für Ihr Interesse!</h2>
-        <h3 class=" text-xl">Wir haben Ihre Anfrage erhalten und kümmern uns darum.</h3>
-        <Icon name="lucide:check-circle" class="w-24 h-24 text-primary" />
-      </div>
-      <div id="contact-form-container" class="mx-3" :class="{ hidden: ok }">
-        <h2 class=" text-3xl font-medium mb-3">Create journey</h2>
-        <form id="contact-form" class="w-full max-w-lg" @submit.prevent="createJourney()">
-          <div class="flex flex-wrap mb-6">
-            <label class="block uppercase tracking-wide  text-xs font-bold mb-2" for="contact-lastname">
-              Name
-            </label>
-            <input id="contact-name" v-model="message.startDate" required
-              class="appearance-none block w-full border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus: focus:border-primary"
-              type="text" />
-          </div>
+  <div class="flex justify-center items-center min-h-screen ">
+    <div class="w-full max-w-md p-6 rounded-lg shadow space-y-4">
+      <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
+        <UFormField label="Name" name="name" class="w-full">
+          <UInput v-model="state.name" class="w-full" />
+        </UFormField>
 
-          <div class="flex flex-wrap mb-6">
-            <label class="block uppercase tracking-wide  text-xs font-bold mb-2" for="contact-lastname">
-              From
-            </label>
-            <input id="contact-name" v-model="message.name" required
-              class="appearance-none block w-full   border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus: focus:border-primary"
-              type="date" />
-          </div>
+        <UFormField label="Start Date" name="startDate" class="w-full">
+          <UPopover class="w-full">
+            <UButton color="neutral" variant="subtle" icon="i-lucide-calendar" class="w-full text-left">
+              {{ startModel ? df.format(startModel.toDate(getLocalTimeZone())) : 'Select a date' }}
+            </UButton>
+            <template #content>
+              <UCalendar v-model="startModel" class="p-2" />
+            </template>
+          </UPopover>
+        </UFormField>
 
-          <div class="flex flex-wrap mb-6">
-            <label class="block uppercase tracking-wide  text-xs font-bold mb-2" for="contact-lastname">
-              To
-            </label>
-            <input id="contact-name" v-model="message.endDate" required
-              class="appearance-none block w-full   border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus: focus:border-primary"
-              type="date" />
-          </div>
+        <UFormField label="End Date" name="endDate" class="w-full">
+          <UPopover class="w-full">
+            <UButton color="neutral" variant="subtle" icon="i-lucide-calendar" class="w-full text-left">
+              {{ endModel ? df.format(endModel.toDate(getLocalTimeZone())) : 'Select a date' }}
+            </UButton>
+            <template #content>
+              <UCalendar v-model="endModel" class="p-2" />
+            </template>
+          </UPopover>
+        </UFormField>
 
-          <button type="submit" class="bg-green-600 p-2 rounded-md  w-full">Create</button>
-        </form>
-      </div>
+        <UButton type="submit">Submit</UButton>
+      </UForm>
     </div>
-  </section>
+  </div>
 </template>
