@@ -13,10 +13,13 @@ services:
       - "8080"
   ui:
     build:
-      context: .
-      dockerfile: ui/Dockerfile
-    expose:
-      - "3000"
+      context: ./ui
+      dockerfile: Dockerfile
+    ports:
+        - "3000:3000"
+    environment:
+      PUBLIC_API_BASE: http://localhost:8080
+
   nginx:
     image: nginx:alpine
     ports:
