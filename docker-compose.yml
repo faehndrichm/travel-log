@@ -5,14 +5,18 @@ services:
       dockerfile: image-service/Dockerfile
     expose:
       - "8080"
-
   journey-service:
     build:
       context: .
       dockerfile: journey-service/Dockerfile
     expose:
       - "8080"
-
+  ui:
+    build:
+      context: .
+      dockerfile: ui/Dockerfile
+    expose:
+      - "3000"
   nginx:
     image: nginx:alpine
     ports:

@@ -76,3 +76,7 @@ _[Ss]cripts
 
 # saved by app
 stored-images
+
+# vue, nuxt
+node_modules
+.nuxt
