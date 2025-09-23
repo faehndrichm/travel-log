@@ -60,8 +60,9 @@ async function onSubmit(event: FormSubmitEvent<JourneySchema>) {
 </script>
 
 <template>
-  <div class="flex justify-center items-center min-h-screen ">
+  <div class="flex justify-center items-center">
     <div class="w-full max-w-md p-6 rounded-lg shadow space-y-4">
+      <h2 class="text-lg font-medium mb-4">Create Journey</h2>
       <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
         <UFormField label="Name" name="name" class="w-full">
           <UInput v-model="state.name" class="w-full" />
