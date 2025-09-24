@@ -8,5 +8,6 @@ namespace journey_service.Entities
         public required string Name { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public List<Spot> Spots { get; set; } = new();
     }
 }

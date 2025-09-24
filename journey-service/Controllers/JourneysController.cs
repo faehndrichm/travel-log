@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using journey_service.Entities;
+using journey_service.Services;
+using journey_service.Events;
 
 namespace journey_service.Controllers
 {
@@ -13,11 +10,13 @@ namespace journey_service.Controllers
     [ApiController]
     public class JourneysController : ControllerBase
     {
+        private readonly KafkaProducerService _kafkaProducer;
         private readonly JourneyContext _context;
 
-        public JourneysController(JourneyContext context)
+        public JourneysController(JourneyContext context, KafkaProducerService kafkaProducer)
         {
             _context = context;
+            _kafkaProducer = kafkaProducer;
         }
 
         // GET: api/Journeys
@@ -102,6 +101,37 @@ namespace journey_service.Controllers
         private bool JourneyExists(long id)
         {
             return _context.Journeys.Any(e => e.Id == id);
+        }
+
+        // GET: api/Journeys/5/Spots
+        [HttpGet("{journeyId}/Spots")]
+        public async Task<ActionResult<IEnumerable<Spot>>> GetSpots(long journeyId)
+        {
+            var journey = await _context.Journeys
+                .Include(j => j.Spots)
+                .FirstOrDefaultAsync(j => j.Id == journeyId);
+
+            if (journey == null) return NotFound();
+
+            return Ok(journey.Spots);
+        }
+
+        // POST: api/Journeys/5/Spots
+        [HttpPost("{journeyId}/Spots")]
+        public async Task<ActionResult<Spot>> AddSpot(long journeyId, Spot spot)
+        {
+            var journey = await _context.Journeys
+                .Include(j => j.Spots)
+                .FirstOrDefaultAsync(j => j.Id == journeyId);
+
+            if (journey == null) return NotFound();
+
+            journey.Spots.Add(spot);
+            await _context.SaveChangesAsync();
+
+            await _kafkaProducer.SendMessageAsync("image-service", journeyId.ToString(), new CreateImageEvent(journeyId,spot.Id));
+
+            return CreatedAtAction(nameof(GetSpots), new { journeyId }, spot);
         }
     }
 }
