@@ -2,11 +2,19 @@ using journey_service.Entities;
 using journey_service.Services;
 using Microsoft.EntityFrameworkCore;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddSingleton<KafkaProducerService>();
+
+
+builder.Services.AddSingleton<S3ImageStorageService>(sp =>
+{
+    var factory = new S3ClientFactory();
+    var internalClient = factory.CreateClient();
+    var externalClient = factory.CreateExternalClient();
+    return new S3ImageStorageService(internalClient, externalClient);
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

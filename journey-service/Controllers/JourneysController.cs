@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using journey_service.Entities;
 using journey_service.Services;
 using journey_service.Events;
+using journey_service.Dto;
 
 namespace journey_service.Controllers
 {
@@ -11,12 +12,14 @@ namespace journey_service.Controllers
     public class JourneysController : ControllerBase
     {
         private readonly KafkaProducerService _kafkaProducer;
+         private readonly S3ImageStorageService _imageService;
         private readonly JourneyContext _context;
 
-        public JourneysController(JourneyContext context, KafkaProducerService kafkaProducer)
+        public JourneysController(JourneyContext context, KafkaProducerService kafkaProducer, S3ImageStorageService imageService)
         {
             _context = context;
             _kafkaProducer = kafkaProducer;
+            _imageService = imageService;
         }
 
         // GET: api/Journeys
@@ -118,7 +121,7 @@ namespace journey_service.Controllers
 
         // POST: api/Journeys/5/Spots
         [HttpPost("{journeyId}/Spots")]
-        public async Task<ActionResult<Spot>> AddSpot(long journeyId, Spot spot)
+        public async Task<ActionResult<Spot>> AddSpot(long journeyId, SpotDto spotDto)
         {
             var journey = await _context.Journeys
                 .Include(j => j.Spots)
@@ -126,10 +129,22 @@ namespace journey_service.Controllers
 
             if (journey == null) return NotFound();
 
+            var spot = new Spot
+            {
+                JourneyId = journeyId,
+                Name = spotDto.Name,
+                Latitude = spotDto.Latitude,
+                Longitude = spotDto.Longitude,
+                Journey = journey
+            };
+
+            if (spotDto.Image != null)
+            {
+                spot.SpotImageId = await _imageService.UploadImageAsync(journeyId.ToString(), spotDto.Image);
+            }
+
             journey.Spots.Add(spot);
             await _context.SaveChangesAsync();
-
-            await _kafkaProducer.SendMessageAsync("image-service", journeyId.ToString(), new CreateImageEvent(journeyId,spot.Id));
 
             return CreatedAtAction(nameof(GetSpots), new { journeyId }, spot);
         }

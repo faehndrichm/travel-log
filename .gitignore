@@ -80,3 +80,6 @@ stored-images
 # vue, nuxt
 node_modules
 .nuxt
+
+# general
+.env

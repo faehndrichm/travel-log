@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace journey_service.Entities;
 
 public class Spot
@@ -10,6 +12,7 @@ public class Spot
     public string? SpotImageId { get; set; }
 
     // Navigation property
-    public required Journey Journey { get; set; }
+     [JsonIgnore]
+    public Journey? Journey { get; set; } 
 
 }
