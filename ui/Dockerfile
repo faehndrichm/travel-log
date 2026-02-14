@@ -8,18 +8,18 @@ RUN bun install --frozen-lockfile --ignore-scripts
 # -------------------
 # Build stage
 # -------------------
-# FROM base AS build
-# COPY . .
-# RUN bun --bun run build
+FROM base AS build
+COPY . .
+RUN bun --bun run build
 
 # -------------------
 # Production stage
 # -------------------
-# FROM oven/bun:1.2 AS production
-# WORKDIR /app
-# COPY --from=build /app/.output /app
-# EXPOSE 3000
-# ENTRYPOINT [ "bun", "--bun", "run", "/app/server/index.mjs" ]
+FROM oven/bun:1.2 AS production
+WORKDIR /app
+COPY --from=build /app/.output /app
+EXPOSE 3000
+ENTRYPOINT [ "bun", "--bun", "run", "/app/server/index.mjs" ]
 
 # -------------------
 # Development stage
