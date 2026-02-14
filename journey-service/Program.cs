@@ -16,6 +16,7 @@ builder.Services.AddSingleton<S3ImageStorageService>(sp =>
     return new S3ImageStorageService(internalClient, externalClient);
 });
 
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -35,6 +36,9 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Health check endpoint
+app.MapGet("/health", () => Results.Ok("OK"));
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
