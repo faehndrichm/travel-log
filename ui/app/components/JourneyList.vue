@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import { format } from 'date-fns';
 
+//const { $keycloak } = useNuxtApp()
+
 const baseURL = "http://nginx:80"; // TODO: config.public.apiServerBase ????;
-const { data, status, error, refresh } = await useFetch<any[]>(baseURL + '/journeys/api/journeys');
+const { data, status, error, refresh } = await useFetch<any[]>(baseURL + '/journeys/api/journeys', {
+    headers: {
+        //Authorization: `Bearer ${$keycloak.token}`
+    },
+    key: 'journeys-list'
+});
 </script>
 
 <template>

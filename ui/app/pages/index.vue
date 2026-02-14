@@ -1,6 +1,10 @@
+<script lang="ts" setup>
+
+</script>
+
 <template>
     <div>
-        <JourneyForm></JourneyForm>
-        <JourneyList></JourneyList>
+        <JourneyForm />
+        <JourneyList />
     </div>
 </template>

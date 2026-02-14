@@ -2,17 +2,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using journey_service.Entities;
 using journey_service.Services;
-using journey_service.Events;
 using journey_service.Dto;
+using Microsoft.AspNetCore.Authorization;
 
 namespace journey_service.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class JourneysController : ControllerBase
     {
         private readonly KafkaProducerService _kafkaProducer;
-         private readonly S3ImageStorageService _imageService;
+        private readonly S3ImageStorageService _imageService;
         private readonly JourneyContext _context;
 
         public JourneysController(JourneyContext context, KafkaProducerService kafkaProducer, S3ImageStorageService imageService)

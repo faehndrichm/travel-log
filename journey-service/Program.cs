@@ -1,8 +1,26 @@
 using journey_service.Entities;
 using journey_service.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata  = false; // only disable for local dev
+        options.Audience = "account";
+        options.Authority = "http://keycloak:8080/realms/demo-realm";
+        options.TokenValidationParameters = new TokenValidationParameters()
+        {
+            ValidIssuer = "http://localhost:8080/realms/demo-realm",
+        };
+        
+    });
+
 
 // Add services to the container.
 builder.Services.AddSingleton<KafkaProducerService>();

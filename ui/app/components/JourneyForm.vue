@@ -4,6 +4,8 @@ import { reactive, shallowRef, watch } from 'vue'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
 
+//const { $keycloak } = useNuxtApp()
+
 const schema = z.object({
   name: z.string(),
   startDate: z.date(),
@@ -32,11 +34,14 @@ async function onSubmit(event: FormSubmitEvent<JourneySchema>) {
   try {
     const config = useRuntimeConfig();
     console.log(config);
-    const baseURL = "http://localhost:8080"; // TODO: config.public.apiBase;
+    const baseURL = "http://localhost:80"; // TODO: config.public.apiBase;
 
     const res = await $fetch(baseURL + '/journeys/api/journeys', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        //Authorization: `Bearer ${$keycloak.token}`
+      },
       body: JSON.stringify(event.data),
     });
 
